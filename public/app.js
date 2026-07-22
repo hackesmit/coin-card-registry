@@ -234,7 +234,7 @@ async function priceItem(item, { silent = false } = {}) {
   try {
     if (!silent) toast('Fetching eBay sold prices…');
     const snap = await fetchPrice({
-      q: item.title, grade: item.grade, days: 90, site: item.site || 'ebay.com', refresh: true,
+      q: item.title, grade: item.grade, type: item.type, days: 90, site: item.site || 'ebay.com', refresh: true,
     });
     item.snapshot = snap;
     item.updatedAt = new Date().toISOString();
@@ -350,8 +350,9 @@ function openDetail(item) {
 
       <div style="margin-top:1rem">
         <div class="detail-value">${ev.value != null ? fmtMoney(ev.value, ev.currency) : '—'} ${ev.manual ? '<span class="manual-tag">your price</span>' : ''}</div>
-        ${snap && snap.count > 0 ? `<div class="detail-range">eBay estimate ${fmtMoney(snap.value, snap.currency)} · range ${fmtMoney(snap.low, snap.currency)}–${fmtMoney(snap.high, snap.currency)} · ${snap.count} sold in last ${snap.days} days</div>` : ''}
-        ${snap && snap.count === 0 ? '<div class="detail-range">No recent sold listings found. Try broader search terms.</div>' : ''}
+        ${snap && snap.count > 0 ? `<div class="detail-range">eBay estimate ${fmtMoney(snap.value, snap.currency)} · range ${fmtMoney(snap.low, snap.currency)}–${fmtMoney(snap.high, snap.currency)} · ${snap.count} matching sale${snap.count === 1 ? '' : 's'} in last ${snap.days} days${Number.isFinite(snap.scrapedCount) && snap.scrapedCount > snap.count ? ` (${snap.scrapedCount - snap.count} unrelated listings ignored)` : ''}</div>` : ''}
+        ${snap && snap.count > 0 && snap.count < 3 ? '<div class="detail-range">Only a couple of close matches — treat this price as rough, or broaden the search terms.</div>' : ''}
+        ${snap && snap.count === 0 ? `<div class="detail-range">No closely-matching sold listings found${Number.isFinite(snap.scrapedCount) && snap.scrapedCount > 0 ? ` (${snap.scrapedCount} unrelated listings ignored)` : ''}. Try broader search terms.</div>` : ''}
         ${!snap ? '<div class="detail-range">Not priced yet.</div>' : ''}
       </div>
 

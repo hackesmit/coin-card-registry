@@ -19,13 +19,14 @@ const SOLDCOMPS_BASE = 'https://api.sold-comps.com/v1/scrape';
  * Real SoldComps adapter. Docs: GET /v1/scrape, Bearer auth.
  * Returns real completed eBay sales (price, condition, date) — no eBay dev account.
  */
-export async function soldCompsProvider(keyword, { days = 90, site = 'ebay.com', apiKey, fetchImpl = fetch } = {}) {
+export async function soldCompsProvider(keyword, { days = 90, site = 'ebay.com', apiKey, categoryId = null, fetchImpl = fetch } = {}) {
   const url = new URL(SOLDCOMPS_BASE);
   url.searchParams.set('keyword', keyword);
   url.searchParams.set('daysToScrape', String(clamp(days, 1, 365)));
   url.searchParams.set('ebaySite', site);
   url.searchParams.set('count', '240');
   url.searchParams.set('sortOrder', 'endedRecently');
+  if (categoryId) url.searchParams.set('categoryId', String(categoryId));
 
   const res = await fetchImpl(url.toString(), {
     headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },

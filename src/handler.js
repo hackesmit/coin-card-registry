@@ -34,7 +34,7 @@ export async function handlePriceRequest(query, env = process.env) {
 }
 
 function cacheKey(q) {
-  return [q.q || '', q.grade || '', q.days || '', q.site || ''].join('|').toLowerCase();
+  return [q.q || '', q.grade || '', q.days || '', q.site || '', q.type || ''].join('|').toLowerCase();
 }
 
 function truthy(v) {

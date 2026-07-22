@@ -120,3 +120,58 @@ test('sanitizeApiKey strips whitespace, quotes, and pasted var name', () => {
   assert.equal(sanitizeApiKey(undefined), '');
   assert.equal(sanitizeApiKey('   '), '');
 });
+
+// --- comp relevance filtering (real junk titles from a live lookup) ---
+const { filterRelevantComps } = await import('../src/pricing.js');
+test('filterRelevantComps drops wrong-year, wrong-kind, and bulk-lot comps', () => {
+  const comps = [
+    { title: '1808 France 1 Franc Napoleon Lyon (D) Mint', price: 60 },
+    { title: 'France, Napoleon 1/2 Franc 1808 A', price: 68.2 },
+    { title: '2025-26 Panini Select Ligue 1 Khalis Merah RC Swatches Patch', price: 45 },
+    { title: 'French Colonies Levant Stamp Collection Part 1 - Mint Hinged', price: 4.76 },
+    { title: '1914-B Switzerland 1 Franc Silver! High Grade!', price: 25 },
+    { title: 'Lot of 1 Francs France silver 49g lot 3171', price: 73.57 },
+    { title: '1844 W 1 Franc France silver lot 3207', price: 11.37 },
+    { title: 'RARE Lalique Bacchantes Small Vase Nudes Deep Dark Green', price: 1190 },
+    { title: '1921 France 1 Franc - Chamber Of Commerce - Paris Mint', price: 2.75 },
+  ];
+  const kept = filterRelevantComps(comps, '1808 1 Franc Lyon mint', 'coin');
+  const titles = kept.map((c) => c.title);
+  assert.ok(titles.includes('1808 France 1 Franc Napoleon Lyon (D) Mint'));
+  for (const t of titles) assert.ok(t.includes('1808'), `wrong year survived: ${t}`);
+  assert.ok(!titles.some((t) => /stamp|panini|vase|lot of/i.test(t)));
+});
+
+test('filterRelevantComps adapts when titles omit qualifier words', () => {
+  const comps = [
+    { title: '1808 France 1 Franc Napoleon', price: 55 },
+    { title: '1808 Ferdinand VII King of Spain Bronze', price: 89 },
+  ];
+  const kept = filterRelevantComps(comps, '1808 1 Franc Lyon mint', 'coin');
+  assert.equal(kept.length, 1);
+  assert.ok(kept[0].title.includes('Franc'));
+});
+
+test('filterRelevantComps keeps card comps and rejects coins for cards', () => {
+  const comps = [
+    { title: '1955 Topps Roberto Clemente Rookie PSA 4', price: 400 },
+    { title: '1955 Silver Quarter Coin High Grade', price: 12 },
+  ];
+  const kept = filterRelevantComps(comps, '1955 Topps Roberto Clemente', 'card');
+  assert.equal(kept.length, 1);
+  assert.ok(kept[0].title.includes('Clemente'));
+});
+
+test('filterRelevantComps rejects wrong denominations (1/2 Franc, 5 Francs, medal)', () => {
+  const comps = [
+    { title: 'Napoleon I - France - 1808 1 Franc silver coin, 0.9 fineness, KM#696.1', price: 86 },
+    { title: '1808 H NAPOLEON BONAPARTE 1 SILVER FRANC (LA ROCHELLE LOWER MINTAGE)', price: 34.78 },
+    { title: 'Napoleon I - 1/2 Half Franc 1808 A Paris', price: 25.04 },
+    { title: 'France 1/2 Franc 1808, Coin, Silver, Napoleon, Inv#I521', price: 25 },
+    { title: '1808-B AU+ France 5 Francs Napoleon I Rouen Mint Silver Coin', price: 299.95 },
+    { title: '1808 (Minted 1818 in France) Ferdinand VII King of Spain Bronze Medal', price: 89 },
+  ];
+  const kept = filterRelevantComps(comps, '1808 1 Franc Lyon mint', 'coin');
+  assert.equal(kept.length, 2);
+  assert.ok(kept.every((c) => /1 (silver )?franc/i.test(c.title)));
+});
