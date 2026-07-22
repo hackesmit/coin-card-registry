@@ -1,0 +1,21 @@
+# Secrets — NEVER commit these. The API key goes in your host's env vars instead.
+.env
+.env.local
+.env.*.local
+
+# Dependencies (none needed, but just in case)
+node_modules/
+
+# Vercel / build artifacts
+.vercel/
+.netlify/
+dist/
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Test/browser artifacts
+.playwright-mcp/

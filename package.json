@@ -1,0 +1,15 @@
+{
+  "name": "coin-card-registry",
+  "version": "1.0.0",
+  "description": "Personal collection book for coins and baseball cards, priced from real eBay sold listings by grade.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
