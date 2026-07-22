@@ -32,7 +32,7 @@ export async function getEstimate(params, env = process.env) {
   const site = VALID_SITES.has(params.site) ? params.site : 'ebay.com';
   const keyword = buildKeyword(q, grade);
 
-  const apiKey = env.SOLDCOMPS_API_KEY;
+  const apiKey = sanitizeApiKey(env.SOLDCOMPS_API_KEY);
   const useReal = Boolean(apiKey);
 
   const comps = useReal
@@ -55,6 +55,15 @@ export async function getEstimate(params, env = process.env) {
       .slice(0, 60),
     generatedAt: new Date().toISOString(),
   };
+}
+
+// Keys pasted into dashboard forms often arrive with stray whitespace, wrapping
+// quotes, or the whole "SOLDCOMPS_API_KEY=" line — all of which break Bearer auth.
+export function sanitizeApiKey(raw) {
+  let key = (raw ?? '').toString().trim();
+  key = key.replace(/^SOLDCOMPS_API_KEY\s*=\s*/i, '');
+  key = key.replace(/^["']+|["']+$/g, '').trim();
+  return key;
 }
 
 function clampDays(d) {

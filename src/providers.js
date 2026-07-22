@@ -33,7 +33,10 @@ export async function soldCompsProvider(keyword, { days = 90, site = 'ebay.com',
 
   if (!res.ok) {
     const body = await safeText(res);
-    const err = new Error(`SoldComps ${res.status}: ${body.slice(0, 200)}`);
+    const msg = res.status === 401 || res.status === 403
+      ? 'SoldComps rejected the price key. Re-paste your sc_... key in Vercel → Settings → Environment Variables (no spaces or quotes), then Redeploy.'
+      : `SoldComps ${res.status}: ${body.slice(0, 200)}`;
+    const err = new Error(msg);
     err.status = res.status;
     throw err;
   }

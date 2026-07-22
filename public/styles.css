@@ -172,3 +172,67 @@ dialog h2 { margin: 0 0 1rem; font-size: 1.15rem; }
   .topbar { padding: .8rem 1rem; }
   main, .toolbar { padding-left: 1rem; padding-right: 1rem; }
 }
+
+/* ---------- Jacob Goldberg, resident grandfather ---------- */
+#jacob-wrap {
+  position: fixed;
+  right: 8px;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+#jacob-img {
+  height: 260px;
+  display: block;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+  transform-origin: bottom center;
+  user-select: none;
+}
+#jacob-img.talking { animation: jacob-bob 0.55s ease-in-out infinite; }
+@keyframes jacob-bob {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-1.6deg) translateY(-2px); }
+}
+#jacob-bubble {
+  max-width: 300px;
+  min-width: 170px;
+  background: #fffdf5;
+  color: #2b2620;
+  border: 2px solid #2b2620;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 0 36px 8px 0;
+  font-size: 15px;
+  line-height: 1.35;
+  position: relative;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+#jacob-bubble.show { opacity: 1; transform: translateY(0) scale(1); }
+#jacob-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -12px;
+  right: 48px;
+  border: 12px solid transparent;
+  border-top-color: #2b2620;
+  border-bottom: 0;
+  border-right: 0;
+}
+#jacob-bubble .jacob-who {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6d3b;
+  margin-bottom: 4px;
+}
+@media (max-width: 700px) {
+  #jacob-img { height: 170px; }
+  #jacob-bubble { max-width: 230px; }
+}

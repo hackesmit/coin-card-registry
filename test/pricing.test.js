@@ -109,3 +109,14 @@ test('money rounds to cents', () => {
   assert.equal(money(2.346), 2.35);
   assert.equal(money(null), null);
 });
+
+// --- API key sanitizing (common Vercel paste mistakes) ---
+const { sanitizeApiKey } = await import('../src/priceService.js');
+test('sanitizeApiKey strips whitespace, quotes, and pasted var name', () => {
+  assert.equal(sanitizeApiKey(' sc_abc123 \n'), 'sc_abc123');
+  assert.equal(sanitizeApiKey('"sc_abc123"'), 'sc_abc123');
+  assert.equal(sanitizeApiKey("'sc_abc123'"), 'sc_abc123');
+  assert.equal(sanitizeApiKey('SOLDCOMPS_API_KEY=sc_abc123'), 'sc_abc123');
+  assert.equal(sanitizeApiKey(undefined), '');
+  assert.equal(sanitizeApiKey('   '), '');
+});

@@ -1,5 +1,6 @@
 import * as db from '/db.js';
 import { fetchPrice } from '/api.js';
+import { initJacob, setCollectionValue } from '/jacob.js';
 
 // ---------- state ----------
 let items = [];
@@ -175,6 +176,9 @@ function renderTotals() {
   $('#t-paid').textContent = sumLabel(paidBy);
   $('#t-value').textContent = sumLabel(valBy);
 
+  // Jacob reacts to the biggest single-currency total (milestones are rough anyway).
+  setCollectionValue(Math.max(0, ...Object.values(valBy)));
+
   // Gain only for the currencies present on both sides.
   const gainParts = [];
   for (const cur of Object.keys(valBy)) {
@@ -296,8 +300,21 @@ $('#item-form').addEventListener('submit', async (e) => {
   render();
 
   // Auto-price brand-new items so he sees a value immediately.
-  if (!existing) priceItem(item);
+  if (!existing) {
+    playCashRegister();
+    priceItem(item);
+  }
 });
+
+// Cha-ching on every new registration. Muted failures are fine (e.g. autoplay
+// restrictions) — the submit click counts as a user gesture in practice.
+const cashRegisterSound = new Audio('/sounds/cash-register.mp3');
+function playCashRegister() {
+  try {
+    cashRegisterSound.currentTime = 0;
+    cashRegisterSound.play().catch(() => {});
+  } catch { /* no audio support — ignore */ }
+}
 
 $('#cancel-btn').addEventListener('click', () => dialog.close());
 
@@ -460,6 +477,7 @@ $('#import-file').addEventListener('change', async (e) => {
 
 // ---------- boot ----------
 async function boot() {
+  initJacob();
   try {
     items = await db.getAll();
   } catch (err) {
@@ -475,7 +493,12 @@ async function boot() {
     } else {
       $('#mode-note').textContent = 'Live: real eBay sold prices, filtered by grade.';
     }
-  } catch { /* leave default tagline */ }
+  } catch (err) {
+    if (/rejected the price key/i.test(err.message)) {
+      $('#mode-note').textContent = '⚠ Price key problem — ' + err.message;
+    }
+    // otherwise leave default tagline
+  }
 }
 
 boot();

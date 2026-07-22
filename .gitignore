@@ -19,3 +19,4 @@ dist/
 
 # Test/browser artifacts
 .playwright-mcp/
+jacob-mock/

@@ -19,6 +19,7 @@ const MIME = {
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
+  '.mp3': 'audio/mpeg',
 };
 
 const server = createServer(async (req, res) => {
